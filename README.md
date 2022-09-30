@@ -1,6 +1,6 @@
 #  超星学习通自动化完成任务点
 
-**此项目使用语言为JAVA语言，可本地化直接命令行运行，也可如果下图基于Springboot启动管理，通过websocket添加用户并执行刷课命令。**
+**此项目使用语言为JAVA语言，可本地化直接命令行运行，也可如下图基于Springboot启动管理，通过websocket添加用户并执行刷课命令。**
 
 **主要根据这个项目改的https://github.com/Samueli924/chaoxing。**
 
