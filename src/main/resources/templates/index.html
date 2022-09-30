@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>学习通课程挂机</title>
+        <style>
+
+            body {
+                background-color: #f5f5e5;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            #app {
+                width: 1000px;
+            }
+
+            #app h1 {
+                font-size: 50px;
+                position: relative;
+            }
+
+            #app h1:first-letter {
+                font-size: 70px;
+            }
+
+            #app h1::after {
+                content: "";
+                position: absolute;
+                line-height: 0;
+                bottom: 0;
+                left: 70px;
+                width: 190px;
+                border-bottom: 5px solid #000;
+            }
+
+            #container {
+                width: 1000px;
+                min-width: 900px;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            #command-wrapper {
+                width: 20%;
+                height: fit-content;
+                background-color: rgba(0, 0, 0, .6);
+                padding: 10px 20px;
+                border-radius: 5px;
+            }
+
+            #command-wrapper p {
+                padding: 0;
+                margin: 10px 0;
+            }
+
+            #websocket-wrapper {
+                width: 70%;
+            }
+
+            #websocket-wrapper input {
+                height: 40px;
+                width: 64%;
+                padding-left: 10px;
+                font-size: 20px;
+                outline: none;
+                border: none;
+                background-color: rgba(0, 0, 0, 0.1);
+                border-radius: 5px;
+                transition: all 0.3s linear;
+            }
+
+            #websocket-wrapper input:hover, #websocket-wrapper input:focus {
+                background-color: rgba(0, 0, 0, 0.4);
+                color: whitesmoke;
+            }
+
+            #websocket-wrapper button {
+                height: 40px;
+                border: none;
+                border-radius: 5px;
+                background-color: #fff;
+                color: #000;
+                padding: 0 6px;
+            }
+
+            #websocket-wrapper button:hover {
+                box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            #app button {
+                cursor: pointer;
+            }
+
+            #app button.warn {
+                background-color: orangered;
+                color: whitesmoke;
+            }
+
+            #app button.info {
+                background-color: darkorange;
+                color: whitesmoke;
+            }
+
+            #app button.primary {
+                background-color: dodgerblue;
+                color: whitesmoke;
+            }
+
+            #app button.error {
+                background-color: red;
+                color: whitesmoke;
+            }
+
+            #message {
+                margin-top: 10px;
+                width: 100%;
+                height: 500px;
+                overflow: auto;
+                border: 1px solid #ccc;
+                padding: 10px 15px;
+                background-color: rgba(0, 0, 0, .6);
+                color: lime;
+                font-size: 18px;
+                border-radius: 5px;
+            }
+
+
+            #message table {
+                border-collapse: collapse;
+                text-align: center;
+                padding: 5px;
+            }
+
+            #message table td, table th {
+                border: 1px solid #cad9ea;
+                color: #666;
+                height: 30px;
+            }
+
+            #message table thead th {
+                background-color: #CCE8EB;
+                width: 100px;
+            }
+
+            #message table tr:nth-child(odd) {
+                background: #fff;
+            }
+
+            #message table tr:nth-child(even) {
+                background: #F5FAFA;
+            }
+
+            .m-left {
+                margin-left: 9px;
+            }
+
+            .command {
+                color: skyblue;
+                padding: 0 0 0 5px;
+                font-weight: 500;
+            }
+
+            #input-wrapper input {
+                width: 100%;
+                height: 25px;
+                padding-left: 5px;
+                font-size: 16px;
+                outline: none;
+                border: none;
+                background-color: rgba(0, 0, 0, 0.1);
+                border-radius: 5px;
+                transition: all 0.3s linear;
+            }
+
+            #input-wrapper input::-webkit-input-placeholder {
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            #input-wrapper input::-moz-placeholder { /* Mozilla Firefox 19+ */
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            #input-wrapper input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            #input-wrapper input:-ms-input-placeholder { /* Internet Explorer 10-11 */
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            #input-wrapper input:not(:first-child) {
+                margin-top: 10px;
+            }
+
+            #input-wrapper input:hover, #input-wrapper input:focus {
+                background-color: rgba(0, 0, 0, 0.4);
+                color: whitesmoke;
+            }
+
+            #input-wrapper button {
+                width: 100%;
+                height: 25px;
+                border: none;
+                border-radius: 5px;
+                background-color: #fff;
+                color: #000;
+                padding: 0 6px;
+                margin-top: 10px;
+            }
+
+            #input-wrapper button:hover {
+                box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+            }
+
+
+            #dialog-wrapper {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                min-width: 100%;
+                min-height: 100%;
+                transition: all .3s;
+            }
+
+            #dialog-wrapper .cover {
+                background: rgba(0, 0, 0, 0.5);
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                min-width: 100%;
+                min-height: 100%;
+            }
+
+            #dialog {
+                font-size: 16px;
+                position: fixed;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 480px;
+                height: 120px;
+                z-index: 90000;
+                background: whitesmoke;
+                border-radius: 5px;
+                padding: 10px;
+                box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            #dialog .title {
+                font-size: 20px;
+            }
+
+            #dialog .content {
+                padding: 0 20px;
+            }
+
+            #dialog .footer {
+                position: absolute;
+                bottom: 10px;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #dialog button {
+                height: 35px;
+                border: none;
+                border-radius: 5px;
+                padding: 0 6px;
+                background-color: dodgerblue;
+                color: whitesmoke;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="app">
+            <h1> WelCome </h1>
+            <div id="container">
+                <div id="command-wrapper">
+                    <p style="color: lime;text-align: center;font-size: 35px;line-height: 0;margin-bottom: 20px">
+                        指令集</p>
+                    <p style="color: whitesmoke">-------------------</p>
+                    <p class="command">>set 用户名 密码</p>
+                    <p class="command">>list 用户名</p>
+                    <p class="command">>select 用户名 课程序号</p>
+                    <p class="command">>run 用户名</p>
+                    <p class="command">>stop 用户名</p>
+                    <p class="command">>update 用户名 密码</p>
+                    <p class="command">>del 用户名</p>
+                    <p style="color: whitesmoke">-------------------</p>
+                    <div id="input-wrapper">
+                        <input v-model="username" type="text" placeholder="设置用户名">
+                        <input v-model="password" type="password" placeholder="设置密码">
+                        <input v-model="courseIndex" type="text" placeholder="输入需要选择的课程序号">
+                        <button class="primary" @click="sendLogin">1、发送登录指令</button>
+                        <button class="warn" @click="sendSelectCourse">2、发送选课指令</button>
+                        <button class="error" @click="sendRunTask">3、启动刷课任务</button>
+                    </div>
+                </div>
+                <div id="websocket-wrapper">
+                    <input v-model="text" type="text"/>
+                    <button class="primary m-left" @click="send">发送指令</button>
+                    <button class="warn m-left" @click="closeWebSocket">关闭连接</button>
+                    <button class="info m-left" @click="reconnect">重新连接</button>
+                    <div id="message" v-html="message">
+                    </div>
+                </div>
+            </div>
+            <div id="dialog-wrapper" v-show="isShowDialog">
+                <div id="dialog">
+                    <span class="title">提示信息:</span>
+                    <div class="content">
+                        <p>{{ dialogMessage }}</p>
+                    </div>
+                    <div class="footer">
+                        <button @click="isShowDialog = false">我知道了</button>
+                    </div>
+                </div>
+                <div class="cover"></div>
+            </div>
+
+        </div>
+    </body>
+    <script>
+        let flag = navigator.userAgent.match(
+            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+        );
+        if (flag != null) {
+            document.body.remove()
+            alert("请使用电脑访问！");
+            location.href = "https://yecaiyu.cn"
+        }
+        //判断当前浏览器是否支持WebSocket
+        if (!('WebSocket' in window)) {
+            document.body.remove()
+            alert('该浏览器不支持websocket')
+            location.href = "https://yecaiyu.cn"
+        }
+    </script>
+    <script src="./vue.min.js"></script>
+    <script type="text/javascript">
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    wsServer: 'ws://' + window.location.host + '/websocket',
+                    ws: null,
+                    message: '',
+                    text: '>',
+                    username: '',
+                    password: '',
+                    courseIndex: '',
+                    dialogMessage: '',
+                    isShowDialog: false,
+                    dialogTimer: null
+                }
+            },
+            mounted() {
+                //1.创建websocket客户端
+                this.webSocketInit(this.wsServer);
+            },
+            destroyed() {
+                // 当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+                this.ws && this.ws.close();
+            },
+            methods: {
+                //socket初始化
+                webSocketInit(service) {
+                    this.ws = new WebSocket(service);
+                    const _this = this
+                    this.ws.onopen = function () {
+                        _this.setMessageInnerHTML("已连接TCP服务器");
+                        // _this.ws.send('Hello WebSockets!');
+                    };
+
+                    //连接发生错误的回调方法
+                    this.ws.onerror = function () {
+                        _this.setMessageInnerHTML("error");
+                    };
+
+                    //连接成功建立的回调方法
+                    this.ws.onopen = function (event) {
+                        // _this.setMessageInnerHTML("open");
+                    }
+
+                    //接收到消息的回调方法
+                    this.ws.onmessage = function (event) {
+                        _this.setMessageInnerHTML(event.data);
+                    };
+
+                    //连接关闭的回调方法
+                    this.ws.onclose = function () {
+                        _this.setMessageInnerHTML("服务器已经断开");
+                    };
+                },
+                //将消息显示在网页上
+                setMessageInnerHTML(message) {
+                    this.message = message + '<br/>' + this.message
+                },
+                // 发送消息
+                send() {
+                    if (this.ws.readyState === this.ws.CLOSED) {
+                        this.setMessageInnerHTML("连接已关闭，请重新连接！");
+                        return
+                    }
+                    this.ws.send(this.text);
+                    this.text = ">"
+                },
+                // 重连
+                reconnect() {
+                    // lockReconnect加锁，防止onclose、onerror两次重连
+                    this.setMessageInnerHTML("正在重连...");
+                    // 进行重连
+                    setTimeout(() => {
+                        this.webSocketInit(this.wsServer);
+                    }, 1000);
+                },
+                // 关闭连接
+                closeWebSocket() {
+                    this.ws.close();
+                },
+                // 发送登录指令
+                sendLogin() {
+                    if (this.username.trim().length === 0 || this.password.trim().length === 0) {
+                        this.showDialog("请设置用户名和密码")
+                        return false
+                    }
+                    this.ws.send(`>set ${this.username.trim()} ${this.password.trim()}`);
+                    this.showDialog('请检查是否登录成功，登录不成功请检查用户密码是否错误')
+                },
+                // 发送选课指令
+                sendSelectCourse() {
+                    if (this.username.trim().length === 0) {
+                        this.showDialog("设置已登录成功的用户名")
+                        return false
+                    }
+                    this.ws.send(`>list ${this.username.trim()}`);
+                    this.showDialog('请在输入框输入需要刷的课程序号')
+                },
+                // 发送启动任务指令
+                sendRunTask() {
+                    if (this.username.trim().length === 0) {
+                        this.showDialog("设置已登录成功的用户名")
+                        return false
+                    }
+                    if (this.courseIndex.trim().length === 0) {
+                        this.showDialog("请设置需要刷的课程序号")
+                        return false
+                    }
+                    this.ws.send(`>select ${this.username.trim()} ${this.courseIndex.trim()}`);
+                    this.showDialog('3秒后开始启动刷课')
+                    setTimeout(() => {
+                        this.ws.send(`>run ${this.username.trim()}`);
+                    }, 3000)
+                },
+                showDialog(message, timeout = 3000) {
+                    this.dialogTimer && clearTimeout(this.dialogTimer)
+                    this.dialogMessage = message
+                    this.isShowDialog = true
+                    // 默认3秒关闭弹窗
+                    this.dialogTimer = setTimeout(() => {
+                        this.isShowDialog = false
+                    }, timeout)
+                }
+            }
+        })
+
+    </script>
+</html>
